@@ -216,3 +216,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# GDOFS Data, Models and Logs
+data/db/
+data/processed/
+models/
+logs/
+.system_generated/
+*.log

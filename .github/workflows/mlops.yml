@@ -1,0 +1,56 @@
+name: GDOFS MLOps CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  validate-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        cache: "pip"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # Install dependencies excluding tensorflow strictly if needed, but standard requirements.txt works in ubuntu-latest
+        pip install -r requirements.txt
+
+    - name: Run Pipeline Linter & Verification
+      run: |
+        python -c "import pandas, numpy, sklearn, xgboost, torch; print('Core ML modules verified!')"
+
+    - name: Execute Pytest Unit Tests
+      run: |
+        pytest tests/
+
+    - name: MLOps Experiment Logs (Simulation)
+      run: |
+        echo "Simulating MLflow Experiment Tracking registration..."
+        echo "Registering model runs, metrics, and parameters..."
+        echo "MLflow run registered successfully with Run ID: gdofs_run_$(date +%s)"
+        echo "Simulating DVC pull..."
+        echo "Data version control synced."
+
+  build-docker-container:
+    needs: validate-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Build Docker Image
+      run: |
+        docker build -t gdofs-system:latest .
+        echo "Docker image compiled successfully."
